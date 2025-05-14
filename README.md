@@ -19,7 +19,7 @@ Folder Structure
 
 # What you'll learn
 - Understand the basics of the Jenkins architecture.
-<!-- - Understand the concept of the Job DSL Plugin on Jenkins and its features. -->
+- Understand the concept of the Job DSL Plugin on Jenkins and its features.
 - Understand with Shared Libraries and Plug-ins
 - Implement CICD Pipelines Security With Jenkins Groovy script
 - Understand the basic scenario CICD flow
@@ -27,14 +27,14 @@ Folder Structure
 # Prerequisite
 - Working knowledge of Jenkins
 - Basic knowledge of automation and the CI-CD strategy
-- Basic knowledge of Docker and K8S
+- Basic knowledge of Docker and EKS
 
 # Install Jenkins
 - Install JDK
   	```
       sudo apt update
       sudo apt install openjdk-17-jre -y
-      sudo apt install openjdk-17-jdk -y
+      sudo apt install openjdk-17-jdk
    	```
 - Install Jenkins
   	```
@@ -67,6 +67,9 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 # Add Jenkins user into docker group
 sudo usermod -aG docker jenkins
 sudo usermod -aG docker $USER
+
+# Check docker version
+docker -v
 ```
 
 ***Note: Log out shell and login again***

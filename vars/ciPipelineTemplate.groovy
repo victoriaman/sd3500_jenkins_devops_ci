@@ -5,12 +5,7 @@ def call(serviceName) {
     def awsCredentialId = "devops-aws-credential"
     def namespaceRegistry = "practical-devops"
     def region = "ap-southeast-1"
-    def eksClusterName = "devops-eks"
 
-    def gitopsRepo = 'https://github.com/victoriaman/sd3500_pisharped_gitops.git'
-    def gitopsBranch = 'main'
-
-    def gitCredential = 'github'
     def imageBuildTag = "${imageRegistry}/${namespaceRegistry}/${serviceName}:${BRANCH_NAME}-${BUILD_NUMBER}"
 
     def trivy = new Trivy()
@@ -26,23 +21,17 @@ def call(serviceName) {
     trivy.trivyScanSecrets()
 
     // Step 2: Run the unit test to check function code and show the test result
-    global.runPythonUnitTest()
     global.processTestResults()
 
-    // Step 3: Scan the vulnerabilities of each python dependencies
+    // Step 3: Scan the vulnerabilities of each dependencies
     trivy.trivyScanVulnerabilities()
 
-    // Step 5: Install python dependencies
-    global.pythonRunInstallDependencies()
-
-    // Step 6: Build docker images with the new tag
+    // Step 4: Build docker images with the new tag
     global.buildDockerImages(imageRegistry: imageRegistry, namespaceRegistry: namespaceRegistry, serviceName: serviceName)
     
-    // Step 7: Scan the vulnerabilities of the new image
+    // Step 5: Scan the vulnerabilities of the new image
     trivy.trivyScanDockerImages(imageBuildTag)
     
-    // Step 8: Push image to image registry and update the new image tag in the gitops repository
-    // and then Argocd can sync the new deployment
+    // Step 6: Push image to image registry
     global.pushDockerImages(imageRegistry: imageRegistry, namespaceRegistry: namespaceRegistry, serviceName: serviceName, region: region, awsCredentialId: awsCredentialId)
-    global.deployToEKS(gitopsRepo: gitopsRepo, gitopsBranch: gitopsBranch, gitCredential: gitCredential, serviceName: serviceName, region: region, awsCredentialId: awsCredentialId, eksClusterName: eksClusterName)
 }

@@ -42,59 +42,70 @@ def pushDockerImages(args) {
     }
 }
 
-def deployToEKS(args){
-    def gitopsRepo = args.gitopsRepo
-    def gitopsBranch = args.gitopsBranch
-    def gitCredential = args.gitCredential
+def deployToEKS(args) {
     def serviceName = args.serviceName
-    def newTag = "${BRANCH_NAME}-${BUILD_NUMBER}"
-
     def awsCredentialId = args.awsCredentialId
     def eksClusterName = args.eksClusterName
     def region = args.region
 
     stage ("Deploy To K8S Using GitOps Concept") {
         script {
-            // Clone the GitOps repository
-            dir('gitops') {
-                git credentialsId: "${gitCredential}", url: "${gitopsRepo}", branch: "${gitopsBranch}"
+            // Determine the target directory based on the branch
+            def targetDir = (env.BRANCH_NAME == 'main') ? 'prod' : 'nonprod'
+            def deploymentYamlFile = "${targetDir}/${serviceName}/${serviceName}.yaml"
 
-                // Determine the target directory based on the branch
-                def targetDir = (env.BRANCH_NAME == 'main') ? 'prod' : 'nonprod'
-                def deploymentYamlFile = "${targetDir}/${serviceName}/deployment.yaml"
-
-                // Update the image tag in the deployment YAML file
+            // Authenticate and apply to EKS
+            withCredentials([
+                [$class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: awsCredentialId,
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']
+            ]) {
                 sh """
-                    sed -i "s|\\(image: [^:]*:\\)[^ ]*|\\1${newTag}|g" ${deploymentYamlFile}
+                    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                    aws configure set default.region ${region}
+
+                    aws eks update-kubeconfig --name ${eksClusterName} --region ${region}
+                    kubectl apply -f ${deploymentYamlFile}
                 """
-                withCredentials([gitUsernamePassword(credentialsId: "${gitCredential}")]) {
-                    // Commit and push the changes
-                    sh """
-                    git config user.email "jenkins-ci@example.com"
-                    git config user.name "Jenkins"
-                    git add ${deploymentYamlFile}
-                    git commit -m "Update image to ${serviceName}"
-                    git push origin ${gitopsBranch}
-                    """
-                }
-
-                // Authenticate and apply to EKS
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: awsCredentialId,
-                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']
-                ]) {
-                    sh """
-                        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                        aws configure set default.region ${region}
-
-                        aws eks update-kubeconfig --name ${eksClusterName} --region ${region}
-                        kubectl apply -f ${deploymentYamlFile}
-                    """
-                }
             }
         }
     }
+}
+
+def detectServiceNameFromCommitedYAMLFile(args) {
+    def gitCredentialId = args.gitCredentialId
+    def gitopsRepo = args.gitopsRepo
+    def detectedService = "unknown"
+
+    stage("Detect serviceName from committed YAML file") {
+        dir('repo') {
+            git url: "${gitopsRepo}",
+                branch: "${env.BRANCH_NAME}",
+                credentialsId: "${gitCredentialId}"
+
+            script {
+                def changedFiles = sh(
+                    script: "git diff --name-only HEAD~1 HEAD",
+                    returnStdout: true
+                ).trim().split("\n")
+
+                for (file in changedFiles) {
+                    if (file ==~ /backend\/backend\.yaml/) {
+                        detectedService = "backend"
+                        break
+                    }
+                    if (file ==~ /frontend\/frontend\.yaml/) {
+                        detectedService = "frontend"
+                        break
+                    }
+                }
+
+                echo "Detected service: ${detectedService}"
+            }
+        }
+    }
+
+    return detectedService
 }

@@ -8,7 +8,7 @@ def buildDockerImages(args) {
     def imageTag = "${imageRegistry}/${namespaceRegistry}/${serviceName}:${BRANCH_NAME}-${BUILD_NUMBER}"
 
     stage("Build Docker Image") {
-        sh "docker build --force-rm --no-cache -t ${imageTag} -f Dockerfile ."
+        sh "docker build --force-rm --no-cache -t ${imageTag} -f ${serviceName}/Dockerfile ."
     }
 }
 

@@ -17,6 +17,13 @@ def call(serviceName) {
             writeFile file: '.ci/html.tpl', text: libraryResource('trivy/html.tpl')
         }
     }
+
+    stage ('Install node_modules') {
+        script {
+            sh "cd frontend && npm install"
+        }
+    }
+
     // Step 1: Scan all the application to check if we can put any sensitive informations in the source code or not
     trivy.trivyScanSecrets()
 

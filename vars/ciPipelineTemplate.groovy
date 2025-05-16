@@ -33,6 +33,12 @@ def call(serviceName) {
     // Step 3: Scan the vulnerabilities of each dependencies
     trivy.trivyScanVulnerabilities()
 
+    stage ('Remove node_modules after trivy run completed') {
+        script {
+            sh "rm -rf node_modules && cd .."
+        }
+    }
+
     // Step 4: Build docker images with the new tag
     global.buildDockerImages(imageRegistry: imageRegistry, namespaceRegistry: namespaceRegistry, serviceName: serviceName)
     

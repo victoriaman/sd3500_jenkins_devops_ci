@@ -1,3 +1,5 @@
+import main.pisharp.*
+
 #!/usr/bin/env groovy
 void call(Map pipelineParams) {
 

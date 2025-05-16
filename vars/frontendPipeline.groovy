@@ -20,6 +20,7 @@ void call(Map pipelineParams) {
                             // Branch Event: Nornal Flow
                             anyOf {
                                 branch 'develop'
+                                branch 'main'
                             }
                             // Manual Run: Only if checked.
                             allOf{

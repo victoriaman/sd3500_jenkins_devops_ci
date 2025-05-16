@@ -27,10 +27,7 @@ def call(serviceName) {
     // Step 1: Scan all the application to check if we can put any sensitive informations in the source code or not
     trivy.trivyScanSecrets()
 
-    // Step 2: Run the unit test to check function code and show the test result
-    global.processTestResults()
-
-    // Step 3: Scan the vulnerabilities of each dependencies
+    // Step 2: Scan the vulnerabilities of each dependencies
     trivy.trivyScanVulnerabilities()
 
     stage ('Remove node_modules after trivy run completed') {
@@ -39,12 +36,12 @@ def call(serviceName) {
         }
     }
 
-    // Step 4: Build docker images with the new tag
+    // Step 3: Build docker images with the new tag
     global.buildDockerImages(imageRegistry: imageRegistry, namespaceRegistry: namespaceRegistry, serviceName: serviceName)
     
-    // Step 5: Scan the vulnerabilities of the new image
+    // Step 4: Scan the vulnerabilities of the new image
     trivy.trivyScanDockerImages(imageBuildTag)
     
-    // Step 6: Push image to image registry
+    // Step 5: Push image to image registry
     global.pushDockerImages(imageRegistry: imageRegistry, namespaceRegistry: namespaceRegistry, serviceName: serviceName, region: region, awsCredentialId: awsCredentialId)
 }

@@ -20,7 +20,7 @@ def call(serviceName) {
 
     stage ('Install node_modules') {
         script {
-            sh "cd frontend && npm install"
+            sh "npm install"
         }
     }
 
@@ -32,7 +32,7 @@ def call(serviceName) {
 
     stage ('Remove node_modules after trivy run completed') {
         script {
-            sh "rm -rf node_modules && cd .."
+            sh "rm -rf node_modules"
         }
     }
 

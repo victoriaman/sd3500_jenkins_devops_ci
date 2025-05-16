@@ -19,7 +19,6 @@ void call(Map pipelineParams) {
                         anyOf{
                             // Branch Event: Nornal Flow
                             anyOf {
-                                branch 'develop'
                                 branch 'main'
                             }
                             // Manual Run: Only if checked.

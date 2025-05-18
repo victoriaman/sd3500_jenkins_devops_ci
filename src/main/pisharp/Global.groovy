@@ -51,8 +51,8 @@ def deployToEKS(args) {
     stage ("Deploy To K8S Using GitOps Concept") {
         script {
             // Determine the target directory based on the branch
-            def targetDir = (env.BRANCH_NAME == 'main') ? 'prod' : 'nonprod'
-            def deploymentYamlFile = "${targetDir}/${serviceName}/${serviceName}.yaml"
+            def envDir = (env.BRANCH_NAME == 'main') ? 'prod' : 'nonprod'
+            def deploymentYamlFile = "jenkins/${envDir}/${serviceName}.yaml"
 
             // Authenticate and apply to EKS
             withCredentials([

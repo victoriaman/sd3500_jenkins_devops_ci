@@ -67,6 +67,11 @@ def deployToEKS(args) {
                     aws configure set default.region ${region}
 
                     aws eks update-kubeconfig --name ${eksClusterName} --region ${region}
+
+                    kubectl get ns devops-ns >/dev/null 2>&1 || kubectl create ns devops-ns
+
+                    kubectl config set-context --current --namespace devops-ns
+
                     kubectl apply -f ${deploymentYamlFile}
                 """
             }

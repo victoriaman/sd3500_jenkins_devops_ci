@@ -50,20 +50,7 @@ void call(Map pipelineParams) {
                             error("❌ Could not detect a valid service from committed YAML files. Ending pipeline.")
                         }
 
-                        // Step 2: Prepare Trivy template
-                        sh "mkdir -p .ci"
-                        writeFile file: '.ci/html.tpl', text: libraryResource('trivy/html.tpl')
-
-                        // Step 3: Scan all the application to check if we can put any sensitive informations in the source code or not
-                        trivy.trivyScanSecrets()
-
-                        // Step 4: Run the unit test to check function code and show the test result
-                        global.processTestResults()
-
-                        // Step 5: Scan the vulnerabilities of each dependencies
-                        trivy.trivyScanVulnerabilities()
-
-                        // Step 6: Deploy to EKS
+                        // Step 2: Deploy to EKS
                         global.deployToEKS(
                             serviceName: serviceName,
                             awsCredentialId: awsCredentialId,

@@ -41,7 +41,7 @@ void call(Map pipelineParams) {
                         // Step 1: Detect service name from committed YAML file
                         def serviceName = global.detectServiceNameFromCommitedYAMLFile(
                             gitCredentialId: 'devops-github-credential',
-                            gitopsRepo: 'https://github.com/victoriaman/sd3500_pisharped_gitops.git'
+                            gitopsRepo: 'https://github.com/victoriaman/sd3500_gitops.git'
                         )
 
                         // End pipeline with error when can't detect out serviceName

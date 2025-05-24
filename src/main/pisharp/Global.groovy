@@ -97,11 +97,11 @@ def detectServiceNameFromCommitedYAMLFile(args) {
                 ).trim().split("\n")
 
                 for (file in changedFiles) {
-                    if (file ==~ /backend\/backend\.yaml/) {
+                    if (file ==~ /.*backend\.yaml$/) {
                         detectedService = "backend"
                         break
                     }
-                    if (file ==~ /frontend\/frontend\.yaml/) {
+                    if (file ==~ /.*frontend\.yaml$/) {
                         detectedService = "frontend"
                         break
                     }
